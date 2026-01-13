@@ -23,10 +23,10 @@ export const colors = {
   primaryDark: '#2563eb',
 
   // States
-  success: '#22c55e',
-  successBg: '#166534',
-  error: '#ef4444',
-  errorBg: '#991b1b',
+  success: '#4ade80',
+  successBg: '#1a3d2a',
+  error: '#f87171',
+  errorBg: '#3d1a1a',
 
   // Text
   text: '#e5e5e5',
