@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Slider from '@react-native-community/slider';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faChevronDown, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { Header, Button, Section } from '../components';
-import { INTERVALS, TRAINING_INTERVALS, DEFAULT_ENABLED_INTERVALS, EnabledIntervals, IntervalKey } from '../core/theory/intervals';
+import { INTERVALS, TRAINING_INTERVALS, DEFAULT_ENABLED_INTERVALS, EnabledIntervals, IntervalKey, SCALES, SCALE_KEYS, ScaleKey, getIntervalsForScale, findMatchingScale, SCALE_STEPS } from '../core/theory/intervals';
+import audioEngine from '../core/audio/AudioEngine';
 import { colors, spacing, fontSize, borderRadius } from '../theme';
 
 type RootStackParamList = {
@@ -19,24 +22,67 @@ interface Props {
 export function IntervalConfigScreen({ navigation }: Props) {
   const [intervals, setIntervals] = useState<EnabledIntervals>(DEFAULT_ENABLED_INTERVALS);
   const [direction, setDirection] = useState<'ascending' | 'descending' | 'both'>('ascending');
-  const [sustainDuration, setSustainDuration] = useState(1.5);
+  const [sustainDuration, setSustainDuration] = useState(0.5);
+  const [selectedScale, setSelectedScale] = useState<ScaleKey>('major');
+  const [showScaleDropdown, setShowScaleDropdown] = useState(false);
+  const [isReady, setIsReady] = useState(false);
+  const initRef = useRef(false);
+
+  useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+    audioEngine.init().then(() => setIsReady(true));
+  }, []);
 
   const hasSelection = Object.values(intervals).some(v => v);
 
   const toggleInterval = (key: IntervalKey) => {
-    setIntervals(prev => ({ ...prev, [key]: !prev[key] }));
+    setIntervals(prev => {
+      const newIntervals = { ...prev, [key]: !prev[key] };
+      setSelectedScale(findMatchingScale(newIntervals));
+      return newIntervals;
+    });
+  };
+
+  const selectScale = (scaleKey: ScaleKey) => {
+    if (scaleKey === 'custom') return;
+    setSelectedScale(scaleKey);
+    setIntervals(getIntervalsForScale(scaleKey));
+    setShowScaleDropdown(false);
   };
 
   const selectAll = () => {
     const all = {} as EnabledIntervals;
     TRAINING_INTERVALS.forEach(k => all[k] = true);
     setIntervals(all);
+    setSelectedScale('custom');
   };
 
   const selectNone = () => {
     const none = {} as EnabledIntervals;
     TRAINING_INTERVALS.forEach(k => none[k] = false);
     setIntervals(none);
+    setSelectedScale('custom');
+  };
+
+  const playScale = async () => {
+    if (!isReady || !hasSelection) return;
+    const baseNote = 60; // C4
+    let steps: number[];
+    if (selectedScale === 'custom') {
+      // Build steps from selected intervals
+      steps = [0];
+      TRAINING_INTERVALS.forEach(key => {
+        if (intervals[key]) steps.push(INTERVALS[key].semitones);
+      });
+      steps.sort((a, b) => a - b);
+    } else {
+      steps = SCALE_STEPS[selectedScale];
+    }
+    for (const step of steps) {
+      await audioEngine.playNote(baseNote + step);
+      await new Promise(resolve => setTimeout(resolve, sustainDuration * 1000));
+    }
   };
 
   const handleStart = () => {
@@ -99,6 +145,23 @@ export function IntervalConfigScreen({ navigation }: Props) {
           </View>
         </Section>
 
+        <Section title="Scale">
+          <View style={styles.scaleRow}>
+            <TouchableOpacity style={styles.dropdown} onPress={() => setShowScaleDropdown(true)}>
+              <Text style={styles.dropdownText}>{SCALES[selectedScale].name}</Text>
+              <FontAwesomeIcon icon={faChevronDown as any} size={12} color={colors.gray400} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.playScaleBtn, !hasSelection && styles.playScaleBtnDisabled]}
+              onPress={playScale}
+              disabled={!hasSelection}
+            >
+              <FontAwesomeIcon icon={faPlay as any} size={12} color={!hasSelection ? colors.gray600 : colors.gray300} />
+              <Text style={[styles.playScaleText, !hasSelection && styles.playScaleTextDisabled]}>Play Scale</Text>
+            </TouchableOpacity>
+          </View>
+        </Section>
+
         <Section title="Direction">
           <View style={styles.toggleGroup}>
             <DirectionButton value="ascending" label="Ascending" />
@@ -111,16 +174,16 @@ export function IntervalConfigScreen({ navigation }: Props) {
           <View style={styles.sliderContainer}>
             <Slider
               style={styles.slider}
-              minimumValue={0.5}
-              maximumValue={4}
-              step={0.5}
+              minimumValue={0.2}
+              maximumValue={2}
+              step={0.1}
               value={sustainDuration}
               onValueChange={setSustainDuration}
               minimumTrackTintColor={colors.primary}
               maximumTrackTintColor={colors.gray700}
               thumbTintColor={colors.gray300}
             />
-            <Text style={styles.sliderValue}>{sustainDuration}s</Text>
+            <Text style={styles.sliderValue}>{sustainDuration.toFixed(1)}s</Text>
           </View>
         </Section>
 
@@ -128,6 +191,20 @@ export function IntervalConfigScreen({ navigation }: Props) {
           Start Training
         </Button>
       </ScrollView>
+
+      <Modal visible={showScaleDropdown} transparent animationType="fade" onRequestClose={() => setShowScaleDropdown(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowScaleDropdown(false)}>
+          <View style={styles.modalContent}>
+            {SCALE_KEYS.map(key => (
+              <TouchableOpacity key={key} style={styles.modalItem} onPress={() => selectScale(key)}>
+                <Text style={[styles.modalItemText, selectedScale === key && styles.modalItemTextActive]}>
+                  {SCALES[key].name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -136,6 +213,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
   content: { padding: spacing.lg },
+  scaleRow: { flexDirection: 'row', gap: spacing.sm },
+  dropdown: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md, backgroundColor: colors.gray800, borderRadius: borderRadius.md },
+  dropdownText: { color: colors.gray200, fontSize: fontSize.md },
+  playScaleBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md, backgroundColor: colors.gray800, borderRadius: borderRadius.md },
+  playScaleBtnDisabled: { opacity: 0.5 },
+  playScaleText: { color: colors.gray300, fontSize: fontSize.sm },
+  playScaleTextDisabled: { color: colors.gray600 },
   sectionActions: { flexDirection: 'row', gap: spacing.lg },
   actionText: { color: colors.gray500, fontSize: fontSize.sm },
   rowsContainer: {
@@ -168,7 +252,12 @@ const styles = StyleSheet.create({
   toggleButtonText: { color: colors.gray500, fontSize: fontSize.sm },
   toggleButtonTextActive: { color: colors.gray200 },
   sliderContainer: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  slider: { flex: 1, height: 40 },
+  slider: { flex: 1, height: 30 },
   sliderValue: { color: colors.gray400, fontSize: fontSize.md, width: 40 },
-  startButton: { marginTop: spacing.lg },
+  startButton: { marginTop: spacing.sm },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: colors.bgLighter, borderRadius: borderRadius.lg, padding: spacing.sm, minWidth: 200 },
+  modalItem: { paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md },
+  modalItemText: { color: colors.gray400, fontSize: fontSize.md },
+  modalItemTextActive: { color: colors.primary },
 });

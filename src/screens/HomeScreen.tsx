@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faMusic } from '@fortawesome/free-solid-svg-icons';
+import { faMusic, faBolt } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '../components';
 import { colors, spacing, fontSize } from '../theme';
 
@@ -36,6 +36,10 @@ export function HomeScreen({ navigation }: Props) {
           </Button>
         </View>
       </View>
+      <View style={styles.poweredBy}>
+        <FontAwesomeIcon icon={faBolt as any} size={12} color={colors.gray600} />
+        <Text style={styles.poweredByText}>powered by apobilici</Text>
+      </View>
     </SafeAreaView>
   );
 }
@@ -47,4 +51,6 @@ const styles = StyleSheet.create({
   title: { fontSize: fontSize.xxxl, fontWeight: '300', color: colors.gray200, marginBottom: spacing.sm },
   subtitle: { fontSize: fontSize.md, color: colors.gray500, marginBottom: spacing.xxl, textAlign: 'center' },
   buttons: { gap: spacing.md, width: '100%', maxWidth: 280 },
+  poweredBy: { position: 'absolute', bottom: spacing.md, right: spacing.lg, flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  poweredByText: { color: colors.gray600, fontSize: fontSize.xs },
 });

@@ -39,20 +39,61 @@ export const TRAINING_INTERVALS: IntervalKey[] = Object.keys(INTERVALS) as Inter
 
 export type EnabledIntervals = Record<IntervalKey, boolean>;
 
-export const DEFAULT_ENABLED_INTERVALS: EnabledIntervals = {
-  'm2': false,
-  'M2': true,
-  'm3': false,
-  'M3': true,
-  'P4': true,
-  'TT': false,
-  'P5': true,
-  'm6': false,
-  'M6': true,
-  'm7': false,
-  'M7': true,
-  'P8': true
+// Scale definitions - intervals that make up each scale
+export type ScaleKey = 'major' | 'natural_minor' | 'harmonic_minor' | 'melodic_minor' | 'dorian' | 'phrygian' | 'lydian' | 'mixolydian' | 'custom';
+
+export interface Scale {
+  name: string;
+  intervals: IntervalKey[];
+}
+
+export const SCALES: Record<ScaleKey, Scale> = {
+  'major': { name: 'Major', intervals: ['M2', 'M3', 'P4', 'P5', 'M6', 'M7', 'P8'] },
+  'natural_minor': { name: 'Natural Minor', intervals: ['M2', 'm3', 'P4', 'P5', 'm6', 'm7', 'P8'] },
+  'harmonic_minor': { name: 'Harmonic Minor', intervals: ['M2', 'm3', 'P4', 'P5', 'm6', 'M7', 'P8'] },
+  'melodic_minor': { name: 'Melodic Minor', intervals: ['M2', 'm3', 'P4', 'P5', 'M6', 'M7', 'P8'] },
+  'dorian': { name: 'Dorian', intervals: ['M2', 'm3', 'P4', 'P5', 'M6', 'm7', 'P8'] },
+  'phrygian': { name: 'Phrygian', intervals: ['m2', 'm3', 'P4', 'P5', 'm6', 'm7', 'P8'] },
+  'lydian': { name: 'Lydian', intervals: ['M2', 'M3', 'TT', 'P5', 'M6', 'M7', 'P8'] },
+  'mixolydian': { name: 'Mixolydian', intervals: ['M2', 'M3', 'P4', 'P5', 'M6', 'm7', 'P8'] },
+  'custom': { name: 'Custom', intervals: [] },
 };
+
+export const SCALE_KEYS: ScaleKey[] = ['major', 'natural_minor', 'harmonic_minor', 'melodic_minor', 'dorian', 'phrygian', 'lydian', 'mixolydian'];
+
+export function getIntervalsForScale(scaleKey: ScaleKey): EnabledIntervals {
+  const result: EnabledIntervals = {
+    'm2': false, 'M2': false, 'm3': false, 'M3': false,
+    'P4': false, 'TT': false, 'P5': false,
+    'm6': false, 'M6': false, 'm7': false, 'M7': false, 'P8': false
+  };
+  if (scaleKey === 'custom') return result;
+  SCALES[scaleKey].intervals.forEach(key => result[key] = true);
+  return result;
+}
+
+export function findMatchingScale(intervals: EnabledIntervals): ScaleKey {
+  for (const scaleKey of SCALE_KEYS) {
+    const scaleIntervals = getIntervalsForScale(scaleKey);
+    const match = TRAINING_INTERVALS.every(k => intervals[k] === scaleIntervals[k]);
+    if (match) return scaleKey;
+  }
+  return 'custom';
+}
+
+// Scale step patterns (semitones from root)
+export const SCALE_STEPS: Record<Exclude<ScaleKey, 'custom'>, number[]> = {
+  'major': [0, 2, 4, 5, 7, 9, 11, 12],
+  'natural_minor': [0, 2, 3, 5, 7, 8, 10, 12],
+  'harmonic_minor': [0, 2, 3, 5, 7, 8, 11, 12],
+  'melodic_minor': [0, 2, 3, 5, 7, 9, 11, 12],
+  'dorian': [0, 2, 3, 5, 7, 9, 10, 12],
+  'phrygian': [0, 1, 3, 5, 7, 8, 10, 12],
+  'lydian': [0, 2, 4, 6, 7, 9, 11, 12],
+  'mixolydian': [0, 2, 4, 5, 7, 9, 10, 12],
+};
+
+export const DEFAULT_ENABLED_INTERVALS: EnabledIntervals = getIntervalsForScale('major');
 
 export function getValidBaseNotes(intervalKey: IntervalKey, ascending = true): Note[] {
   const interval = INTERVALS[intervalKey];
