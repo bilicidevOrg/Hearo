@@ -140,7 +140,6 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
   const percentage = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
 
   const getButtonVariant = (key: string, isEnabled: boolean) => {
-    if (highlightedInterval === key) return styles.answerHighlighted;
     if (!isAnswered) return isEnabled ? null : styles.answerMuted;
     if (key === question?.intervalKey) return styles.answerCorrect;
     if (key === selectedAnswer) return styles.answerWrong;
@@ -148,12 +147,13 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
   };
 
   const getTextVariant = (key: string, isEnabled: boolean) => {
-    if (highlightedInterval === key) return styles.answerTextHighlighted;
     if (!isAnswered) return isEnabled ? null : styles.answerTextMuted;
     if (key === question?.intervalKey) return styles.answerTextCorrect;
     if (key === selectedAnswer) return styles.answerTextWrong;
     return isEnabled ? null : styles.answerTextMuted;
   };
+
+  const isHighlighted = (key: string) => highlightedInterval === key;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -200,7 +200,7 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
                   return (
                     <TouchableOpacity
                       key={item.key}
-                      style={[styles.answerButton, getButtonVariant(item.key, isEnabled)]}
+                      style={[styles.answerButton, getButtonVariant(item.key, isEnabled), isHighlighted(item.key) && styles.answerHighlighted]}
                       onPress={() => canClick && (isAnswered ? playIntervalFromBase(item.key) : handleAnswer(item.key))}
                       activeOpacity={canClick ? 0.7 : 1}
                     >
@@ -259,7 +259,6 @@ const styles = StyleSheet.create({
   answerTextCorrect: { color: colors.success },
   answerTextWrong: { color: colors.error },
   answerTextMuted: { color: colors.gray600 },
-  answerHighlighted: { backgroundColor: colors.primary },
-  answerTextHighlighted: { color: colors.text },
+  answerHighlighted: { borderWidth: 2, borderColor: colors.primary },
   nextContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: spacing.md, height: 56 },
 });
