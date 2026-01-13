@@ -107,17 +107,18 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
 
   const percentage = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
 
-  const getButtonVariant = (key: string) => {
-    if (!isAnswered) return null;
+  const getButtonVariant = (key: string, isEnabled: boolean) => {
+    if (!isAnswered) return isEnabled ? null : styles.answerMuted;
     if (key === question?.intervalKey) return styles.answerCorrect;
     if (key === selectedAnswer) return styles.answerWrong;
-    return styles.answerDisabled;
+    return isEnabled ? styles.answerDisabled : styles.answerMuted;
   };
 
-  const getTextVariant = (key: string) => {
-    if (!isAnswered) return null;
+  const getTextVariant = (key: string, isEnabled: boolean) => {
+    if (!isAnswered) return isEnabled ? null : styles.answerTextMuted;
     if (key === question?.intervalKey) return styles.answerTextCorrect;
-    return styles.answerTextDisabled;
+    if (key === selectedAnswer) return styles.answerTextWrong;
+    return isEnabled ? null : styles.answerTextMuted;
   };
 
   return (
@@ -161,14 +162,15 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
               <View key={groupIndex} style={styles.answerRow}>
                 {group.map(item => {
                   const isEnabled = enabledIntervals[item.key];
+                  const canClick = isEnabled || isAnswered;
                   return (
                     <TouchableOpacity
                       key={item.key}
-                      style={[styles.answerButton, isEnabled ? getButtonVariant(item.key) : styles.answerMuted]}
-                      onPress={() => isEnabled && (isAnswered ? playIntervalFromBase(item.key) : handleAnswer(item.key))}
-                      activeOpacity={isEnabled ? 0.7 : 1}
+                      style={[styles.answerButton, getButtonVariant(item.key, isEnabled)]}
+                      onPress={() => canClick && (isAnswered ? playIntervalFromBase(item.key) : handleAnswer(item.key))}
+                      activeOpacity={canClick ? 0.7 : 1}
                     >
-                      <Text style={[styles.answerButtonText, isEnabled ? getTextVariant(item.key) : styles.answerTextMuted]}>
+                      <Text style={[styles.answerButtonText, getTextVariant(item.key, isEnabled)]}>
                         {item.label}
                       </Text>
                     </TouchableOpacity>
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
   answerMuted: { backgroundColor: colors.gray800, opacity: 0.4 },
   answerButtonText: { color: colors.gray200, fontSize: fontSize.sm },
   answerTextCorrect: { color: colors.success },
-  answerTextDisabled: { color: colors.gray600 },
+  answerTextWrong: { color: colors.error },
   answerTextMuted: { color: colors.gray600 },
   nextContainer: { alignItems: 'center', height: 56 },
 });
