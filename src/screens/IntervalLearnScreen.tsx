@@ -20,7 +20,7 @@ interface Props {
 export function IntervalLearnScreen({ navigation }: Props) {
   const [selectedInterval, setSelectedInterval] = useState<IntervalKey | null>(null);
   const [direction, setDirection] = useState<'ascending' | 'descending' | 'both'>('ascending');
-  const [sustainDuration, setSustainDuration] = useState(0.5);
+  const [sustainDuration, setSustainDuration] = useState(1);
   const [playbackMode, setPlaybackMode] = useState<'melodic' | 'harmonic'>('melodic');
   const [lockedBaseNote, setLockedBaseNote] = useState<Note | null>(null);
   const [currentExample, setCurrentExample] = useState<IntervalQuestion | null>(null);

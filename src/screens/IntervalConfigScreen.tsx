@@ -22,7 +22,7 @@ interface Props {
 export function IntervalConfigScreen({ navigation }: Props) {
   const [intervals, setIntervals] = useState<EnabledIntervals>(DEFAULT_ENABLED_INTERVALS);
   const [direction, setDirection] = useState<'ascending' | 'descending' | 'both'>('ascending');
-  const [sustainDuration, setSustainDuration] = useState(0.5);
+  const [sustainDuration, setSustainDuration] = useState(1);
   const [selectedScale, setSelectedScale] = useState<ScaleKey>('major');
   const [showScaleDropdown, setShowScaleDropdown] = useState(false);
   const [isReady, setIsReady] = useState(false);

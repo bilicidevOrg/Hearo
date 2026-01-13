@@ -30,6 +30,8 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [lockedBaseNote, setLockedBaseNote] = useState<Note | null>(null);
+  const [highlightedInterval, setHighlightedInterval] = useState<IntervalKey | 'root' | null>(null);
+  const [isPlayingScale, setIsPlayingScale] = useState(false);
   const initRef = useRef(false);
 
   const intervalKeys = (Object.keys(enabledIntervals) as IntervalKey[]).filter(k => enabledIntervals[k]);
@@ -105,9 +107,40 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
     if (question) setTimeout(() => audioEngine.playInterval(question.note1.midi, question.note2.midi, mode), 100);
   };
 
+  const playScale = useCallback(async () => {
+    if (!question || isPlayingScale) return;
+
+    // Get sorted enabled intervals by semitones
+    const sortedIntervals = intervalKeys
+      .map(key => ({ key, semitones: INTERVALS[key].semitones }))
+      .sort((a, b) => a.semitones - b.semitones);
+
+    const delayMs = sustainDuration * 600;
+    setIsPlayingScale(true);
+
+    // Play root first
+    setHighlightedInterval('root');
+    await audioEngine.playNote(question.note1.midi);
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+
+    // Play each interval
+    for (const { key } of sortedIntervals) {
+      setHighlightedInterval(key);
+      const targetMidi = question.ascending
+        ? question.note1.midi + INTERVALS[key].semitones
+        : question.note1.midi - INTERVALS[key].semitones;
+      await audioEngine.playNote(targetMidi);
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+
+    setHighlightedInterval(null);
+    setIsPlayingScale(false);
+  }, [question, isPlayingScale, intervalKeys, sustainDuration]);
+
   const percentage = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
 
   const getButtonVariant = (key: string, isEnabled: boolean) => {
+    if (highlightedInterval === key) return styles.answerHighlighted;
     if (!isAnswered) return isEnabled ? null : styles.answerMuted;
     if (key === question?.intervalKey) return styles.answerCorrect;
     if (key === selectedAnswer) return styles.answerWrong;
@@ -115,6 +148,7 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
   };
 
   const getTextVariant = (key: string, isEnabled: boolean) => {
+    if (highlightedInterval === key) return styles.answerTextHighlighted;
     if (!isAnswered) return isEnabled ? null : styles.answerTextMuted;
     if (key === question?.intervalKey) return styles.answerTextCorrect;
     if (key === selectedAnswer) return styles.answerTextWrong;
@@ -134,10 +168,10 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
                 onPress={() => audioEngine.playNote(question.note1.midi)}
                 onLongPress={toggleLockBaseNote}
                 delayLongPress={300}
-                style={[styles.noteBox, lockedBaseNote && styles.noteBoxLocked]}
+                style={[styles.noteBox, lockedBaseNote && styles.noteBoxLocked, highlightedInterval === 'root' && styles.noteBoxHighlighted]}
               >
                 {lockedBaseNote && <View style={styles.lockIconWrapper}><FontAwesomeIcon icon={faLock as any} size={14} color={colors.primary} /></View>}
-                <Text style={[styles.noteName, lockedBaseNote && styles.noteNameLocked]}>{question.note1.name}</Text>
+                <Text style={[styles.noteName, lockedBaseNote && styles.noteNameLocked, highlightedInterval === 'root' && styles.noteNameHighlighted]}>{question.note1.name}</Text>
               </TouchableOpacity>
               <Text style={styles.arrow}>→</Text>
               <TouchableOpacity onPress={() => audioEngine.playNote(question.note2.midi)} style={styles.noteBox}>
@@ -181,7 +215,14 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
           </View>
 
           <View style={styles.nextContainer}>
-            {isAnswered && <Button size="lg" onPress={generateNewQuestion}>Next</Button>}
+            {isAnswered && (
+              <>
+                <Button variant="secondary" onPress={playScale} disabled={isPlayingScale}>
+                  Play Scale
+                </Button>
+                <Button size="lg" onPress={generateNewQuestion}>Next</Button>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -198,6 +239,8 @@ const styles = StyleSheet.create({
   notesDisplay: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
   noteBox: { width: 100, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs, borderRadius: borderRadius.md },
   noteBoxLocked: { backgroundColor: colors.primaryDark + '30' },
+  noteBoxHighlighted: { backgroundColor: colors.primary + '40' },
+  noteNameHighlighted: { color: colors.primary },
   lockIconWrapper: { position: 'absolute', left: -22, top: 0, bottom: 0, justifyContent: 'center' },
   noteName: { fontSize: 48, color: colors.gray200, fontWeight: '300' },
   noteNameLocked: { color: colors.primary },
@@ -216,5 +259,7 @@ const styles = StyleSheet.create({
   answerTextCorrect: { color: colors.success },
   answerTextWrong: { color: colors.error },
   answerTextMuted: { color: colors.gray600 },
-  nextContainer: { alignItems: 'center', height: 56 },
+  answerHighlighted: { backgroundColor: colors.primary },
+  answerTextHighlighted: { color: colors.text },
+  nextContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: spacing.md, height: 56 },
 });
