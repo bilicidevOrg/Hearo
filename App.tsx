@@ -1,5 +1,5 @@
 /**
- * Ear Training Mobile App
+ * Hearo - Ear Training App
  */
 
 import { NavigationContainer } from '@react-navigation/native';

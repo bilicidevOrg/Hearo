@@ -1,4 +1,4 @@
-# Ear Training Mobile
+# Hearo
 
 React Native (Expo) ile yazılmış kulak eğitimi uygulaması.
 

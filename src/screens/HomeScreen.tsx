@@ -24,7 +24,7 @@ export function HomeScreen({ navigation }: Props) {
         <View style={styles.icon}>
           <FontAwesomeIcon icon={faMusic as any} size={48} color={colors.gray600} />
         </View>
-        <Text style={styles.title}>Ear Training</Text>
+        <Text style={styles.title}>Hearo</Text>
         <Text style={styles.subtitle}>Train your ear to recognize musical intervals</Text>
 
         <View style={styles.buttons}>
