@@ -4,9 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faRotateRight } from '@fortawesome/free-solid-svg-icons';
-import { Header, Button, Card } from '../components';
+import { faRotateRight, faLock } from '@fortawesome/free-solid-svg-icons';
+import { Header, Button } from '../components';
 import { INTERVALS, generateIntervalQuestion, EnabledIntervals, IntervalKey, IntervalQuestion } from '../core/theory/intervals';
+import { Note } from '../core/theory/notes';
 import audioEngine from '../core/audio/AudioEngine';
 import { colors, spacing, fontSize, borderRadius } from '../theme';
 
@@ -28,6 +29,7 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
   const [isAnswered, setIsAnswered] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [lockedBaseNote, setLockedBaseNote] = useState<Note | null>(null);
   const initRef = useRef(false);
 
   const intervalKeys = (Object.keys(enabledIntervals) as IntervalKey[]).filter(k => enabledIntervals[k]);
@@ -43,14 +45,23 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
   ];
 
   const generateNewQuestion = useCallback(() => {
-    const q = generateIntervalQuestion(enabledIntervals, direction);
+    const q = generateIntervalQuestion(enabledIntervals, direction, lockedBaseNote);
     setQuestion(q);
     setIsAnswered(false);
     setSelectedAnswer(null);
     if (q && isReady) {
       setTimeout(() => audioEngine.playInterval(q.note1.midi, q.note2.midi, playbackMode), 400);
     }
-  }, [enabledIntervals, direction, isReady, playbackMode]);
+  }, [enabledIntervals, direction, isReady, playbackMode, lockedBaseNote]);
+
+  const toggleLockBaseNote = useCallback(() => {
+    if (!question) return;
+    if (lockedBaseNote?.midi === question.note1.midi) {
+      setLockedBaseNote(null);
+    } else {
+      setLockedBaseNote(question.note1);
+    }
+  }, [question, lockedBaseNote]);
 
   useEffect(() => {
     if (initRef.current) return;
@@ -118,11 +129,17 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
         {question && (
           <View style={styles.questionArea}>
             <View style={styles.notesDisplay}>
-              <TouchableOpacity onPress={() => audioEngine.playNote(question.note1.midi)}>
-                <Text style={styles.noteName}>{question.note1.name}</Text>
+              <TouchableOpacity
+                onPress={() => audioEngine.playNote(question.note1.midi)}
+                onLongPress={toggleLockBaseNote}
+                delayLongPress={300}
+                style={[styles.noteBox, lockedBaseNote && styles.noteBoxLocked]}
+              >
+                {lockedBaseNote && <View style={styles.lockIconWrapper}><FontAwesomeIcon icon={faLock as any} size={14} color={colors.primary} /></View>}
+                <Text style={[styles.noteName, lockedBaseNote && styles.noteNameLocked]}>{question.note1.name}</Text>
               </TouchableOpacity>
               <Text style={styles.arrow}>→</Text>
-              <TouchableOpacity onPress={() => audioEngine.playNote(question.note2.midi)} disabled={!isAnswered}>
+              <TouchableOpacity onPress={() => audioEngine.playNote(question.note2.midi)} style={styles.noteBox}>
                 <Text style={styles.noteName}>{isAnswered ? question.note2.name : '?'}</Text>
               </TouchableOpacity>
             </View>
@@ -177,8 +194,12 @@ const styles = StyleSheet.create({
   percentage: { color: colors.gray600 },
   questionArea: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   notesDisplay: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
+  noteBox: { width: 100, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs, borderRadius: borderRadius.md },
+  noteBoxLocked: { backgroundColor: colors.primaryDark + '30' },
+  lockIconWrapper: { position: 'absolute', left: -22, top: 0, bottom: 0, justifyContent: 'center' },
   noteName: { fontSize: 48, color: colors.gray200, fontWeight: '300' },
-  arrow: { fontSize: fontSize.xxl, color: colors.gray600, marginHorizontal: spacing.lg },
+  noteNameLocked: { color: colors.primary },
+  arrow: { fontSize: fontSize.xxl, color: colors.gray600, marginHorizontal: spacing.md },
   intervalResult: { fontSize: fontSize.lg, color: colors.primary, height: 24 },
   hidden: { color: 'transparent' },
   bottomSection: {},

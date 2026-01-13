@@ -153,12 +153,12 @@ export function IntervalLearnScreen({ navigation }: Props) {
             <>
               <Text style={styles.exampleTitle}>{currentExample.intervalName}</Text>
               <View style={styles.notesRow}>
-                <TouchableOpacity onPress={toggleLockBaseNote} style={[styles.noteButton, lockedBaseNote && styles.noteButtonLocked]}>
-                  {lockedBaseNote && <FontAwesomeIcon icon={faLock as any} size={10} color={colors.primary} style={styles.lockIcon} />}
+                <TouchableOpacity onPress={toggleLockBaseNote} style={[styles.noteBox, lockedBaseNote && styles.noteBoxLocked]}>
+                  {lockedBaseNote && <View style={styles.lockIconWrapper}><FontAwesomeIcon icon={faLock as any} size={12} color={colors.primary} /></View>}
                   <Text style={[styles.noteText, lockedBaseNote && styles.noteTextLocked]}>{currentExample.note1.name}</Text>
                 </TouchableOpacity>
                 <Text style={styles.arrow}>→</Text>
-                <TouchableOpacity onPress={() => audioEngine.playNote(currentExample.note2.midi)} style={styles.noteButton}>
+                <TouchableOpacity onPress={() => audioEngine.playNote(currentExample.note2.midi)} style={styles.noteBox}>
                   <Text style={styles.noteText}>{currentExample.note2.name}</Text>
                 </TouchableOpacity>
               </View>
@@ -207,9 +207,9 @@ const styles = StyleSheet.create({
   exampleCard: { alignItems: 'center', marginBottom: spacing.lg, minHeight: 140 },
   exampleTitle: { fontSize: fontSize.xxl, color: colors.gray200, marginBottom: spacing.md },
   notesRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
-  noteButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.xs, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  noteButtonLocked: { backgroundColor: colors.primaryDark + '30' },
-  lockIcon: { marginRight: spacing.xs },
+  noteBox: { width: 50, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing.xs, borderRadius: borderRadius.sm },
+  noteBoxLocked: { backgroundColor: colors.primaryDark + '30' },
+  lockIconWrapper: { position: 'absolute', left: -18, top: 0, bottom: 0, justifyContent: 'center' },
   noteText: { fontSize: fontSize.xl, color: colors.gray400 },
   noteTextLocked: { color: colors.primary },
   arrow: { fontSize: fontSize.xl, color: colors.gray600, marginHorizontal: spacing.sm },
