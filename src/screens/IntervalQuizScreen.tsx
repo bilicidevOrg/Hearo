@@ -32,6 +32,16 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
 
   const intervalKeys = (Object.keys(enabledIntervals) as IntervalKey[]).filter(k => enabledIntervals[k]);
 
+  // Interval groups for display
+  const intervalGroups: { key: IntervalKey; label: string }[][] = [
+    [{ key: 'm2', label: 'Minor 2nd' }, { key: 'M2', label: 'Major 2nd' }],
+    [{ key: 'm3', label: 'Minor 3rd' }, { key: 'M3', label: 'Major 3rd' }],
+    [{ key: 'P4', label: 'Perfect 4th' }, { key: 'TT', label: 'Tritone' }, { key: 'P5', label: 'Perfect 5th' }],
+    [{ key: 'm6', label: 'Minor 6th' }, { key: 'M6', label: 'Major 6th' }],
+    [{ key: 'm7', label: 'Minor 7th' }, { key: 'M7', label: 'Major 7th' }],
+    [{ key: 'P8', label: 'Octave' }],
+  ];
+
   const generateNewQuestion = useCallback(() => {
     const q = generateIntervalQuestion(enabledIntervals, direction);
     setQuestion(q);
@@ -86,30 +96,27 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
 
   const percentage = score.total > 0 ? Math.round((score.correct / score.total) * 100) : 0;
 
-  const getButtonStyle = (key: string) => {
-    if (!isAnswered) return styles.answerButton;
-    if (key === question?.intervalKey) return [styles.answerButton, styles.answerCorrect];
-    if (key === selectedAnswer) return [styles.answerButton, styles.answerWrong];
-    return [styles.answerButton, styles.answerDisabled];
+  const getButtonVariant = (key: string) => {
+    if (!isAnswered) return null;
+    if (key === question?.intervalKey) return styles.answerCorrect;
+    if (key === selectedAnswer) return styles.answerWrong;
+    return styles.answerDisabled;
   };
 
-  const getButtonTextStyle = (key: string) => {
-    if (!isAnswered) return styles.answerButtonText;
-    if (key === question?.intervalKey) return [styles.answerButtonText, styles.answerTextCorrect];
-    return [styles.answerButtonText, styles.answerTextDisabled];
+  const getTextVariant = (key: string) => {
+    if (!isAnswered) return null;
+    if (key === question?.intervalKey) return styles.answerTextCorrect;
+    return styles.answerTextDisabled;
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <Header title="Interval Quiz" onBack={() => navigation.goBack()} />
       <View style={styles.content}>
-        <View style={styles.scoreContainer}>
-          <Text style={styles.score}>{score.correct} / {score.total}</Text>
-          <Text style={styles.percentage}>{percentage}%</Text>
-        </View>
+        <Text style={styles.score}>{score.correct}/{score.total} <Text style={styles.percentage}>{percentage}%</Text></Text>
 
         {question && (
-          <Card variant="highlighted" style={styles.questionCard}>
+          <View style={styles.questionArea}>
             <View style={styles.notesDisplay}>
               <TouchableOpacity onPress={() => audioEngine.playNote(question.note1.midi)}>
                 <Text style={styles.noteName}>{question.note1.name}</Text>
@@ -119,32 +126,44 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
                 <Text style={styles.noteName}>{isAnswered ? question.note2.name : '?'}</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.intervalName, !isAnswered && styles.hidden]}>{question.intervalName}</Text>
-            <View style={styles.playbackControls}>
-              <Button active={playbackMode === 'melodic'} onPress={() => changeMode('melodic')} size="sm">Melodic</Button>
-              <Button active={playbackMode === 'harmonic'} onPress={() => changeMode('harmonic')} size="sm">Harmonic</Button>
-              <Button variant="secondary" onPress={replay} size="sm">
-                <FontAwesomeIcon icon={faRotateRight as any} size={14} color={colors.gray400} />
-              </Button>
-            </View>
-          </Card>
+            <Text style={[styles.intervalResult, !isAnswered && styles.hidden]}>{question.intervalName}</Text>
+          </View>
         )}
 
-        <View style={styles.answersGrid}>
-          {intervalKeys.map((key) => (
-            <TouchableOpacity
-              key={key}
-              style={getButtonStyle(key)}
-              onPress={() => isAnswered ? playIntervalFromBase(key) : handleAnswer(key)}
-              activeOpacity={0.7}
-            >
-              <Text style={getButtonTextStyle(key)}>{INTERVALS[key].name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <View style={styles.bottomSection}>
+          <View style={styles.playbackControls}>
+            <Button active={playbackMode === 'melodic'} onPress={() => changeMode('melodic')} size="sm">Melodic</Button>
+            <Button active={playbackMode === 'harmonic'} onPress={() => changeMode('harmonic')} size="sm">Harmonic</Button>
+            <Button variant="secondary" onPress={replay} size="sm">
+              <FontAwesomeIcon icon={faRotateRight as any} size={14} color={colors.gray400} />
+            </Button>
+          </View>
 
-        <View style={styles.nextContainer}>
-          {isAnswered && <Button size="lg" onPress={generateNewQuestion}>Next</Button>}
+          <View style={styles.answersContainer}>
+            {intervalGroups.map((group, groupIndex) => (
+              <View key={groupIndex} style={styles.answerRow}>
+                {group.map(item => {
+                  const isEnabled = enabledIntervals[item.key];
+                  return (
+                    <TouchableOpacity
+                      key={item.key}
+                      style={[styles.answerButton, isEnabled ? getButtonVariant(item.key) : styles.answerMuted]}
+                      onPress={() => isEnabled && (isAnswered ? playIntervalFromBase(item.key) : handleAnswer(item.key))}
+                      activeOpacity={isEnabled ? 0.7 : 1}
+                    >
+                      <Text style={[styles.answerButtonText, isEnabled ? getTextVariant(item.key) : styles.answerTextMuted]}>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.nextContainer}>
+            {isAnswered && <Button size="lg" onPress={generateNewQuestion}>Next</Button>}
+          </View>
         </View>
       </View>
     </SafeAreaView>
@@ -154,23 +173,26 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { flex: 1, padding: spacing.lg },
-  scoreContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: spacing.lg, gap: spacing.md },
-  score: { fontSize: fontSize.xxl, color: colors.gray300 },
-  percentage: { fontSize: fontSize.lg, color: colors.gray500 },
-  questionCard: { alignItems: 'center', marginBottom: spacing.lg },
+  score: { fontSize: fontSize.sm, color: colors.gray500, textAlign: 'right' },
+  percentage: { color: colors.gray600 },
+  questionArea: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   notesDisplay: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
-  noteName: { fontSize: fontSize.xl, color: colors.gray300 },
-  arrow: { fontSize: fontSize.xl, color: colors.gray500, marginHorizontal: spacing.sm },
-  intervalName: { fontSize: fontSize.lg, color: colors.gray400, marginBottom: spacing.md, height: 24 },
+  noteName: { fontSize: 48, color: colors.gray200, fontWeight: '300' },
+  arrow: { fontSize: fontSize.xxl, color: colors.gray600, marginHorizontal: spacing.lg },
+  intervalResult: { fontSize: fontSize.lg, color: colors.primary, height: 24 },
   hidden: { color: 'transparent' },
-  playbackControls: { flexDirection: 'row', gap: spacing.sm },
-  answersGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: spacing.sm, marginBottom: spacing.lg },
-  answerButton: { minWidth: 110, paddingVertical: spacing.md, paddingHorizontal: spacing.md, backgroundColor: colors.gray700, borderRadius: borderRadius.md, alignItems: 'center' },
+  bottomSection: {},
+  playbackControls: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm, marginBottom: spacing.md },
+  answersContainer: { gap: spacing.sm, marginBottom: spacing.md },
+  answerRow: { flexDirection: 'row', gap: spacing.sm },
+  answerButton: { flex: 1, paddingVertical: spacing.sm + 2, backgroundColor: colors.gray700, borderRadius: borderRadius.md, alignItems: 'center' },
   answerCorrect: { backgroundColor: colors.successBg },
   answerWrong: { backgroundColor: colors.errorBg },
   answerDisabled: { backgroundColor: colors.gray800 },
-  answerButtonText: { color: colors.gray200, fontSize: fontSize.md },
+  answerMuted: { backgroundColor: colors.gray800, opacity: 0.4 },
+  answerButtonText: { color: colors.gray200, fontSize: fontSize.sm },
   answerTextCorrect: { color: colors.success },
   answerTextDisabled: { color: colors.gray600 },
+  answerTextMuted: { color: colors.gray600 },
   nextContainer: { alignItems: 'center', height: 56 },
 });

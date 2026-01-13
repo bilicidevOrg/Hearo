@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Slider from '@react-native-community/slider';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
+import { faLock } from '@fortawesome/free-solid-svg-icons';
 import { Header, Button, Card, Section } from '../components';
 import { INTERVALS, TRAINING_INTERVALS, generateIntervalQuestion, IntervalKey, IntervalQuestion } from '../core/theory/intervals';
 import { Note } from '../core/theory/notes';
@@ -104,46 +104,74 @@ export function IntervalLearnScreen({ navigation }: Props) {
       <Header title="Learn Intervals" onBack={() => navigation.goBack()} />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Section title="Select Interval">
-          <View style={styles.intervalsGrid}>
-            {TRAINING_INTERVALS.map((key) => (
-              <TouchableOpacity
-                key={key}
-                style={[styles.intervalCard, selectedInterval === key && styles.intervalCardActive]}
-                onPress={() => selectInterval(key)}
-              >
-                <Text style={[styles.intervalCardText, selectedInterval === key && styles.intervalCardTextActive]}>
-                  {INTERVALS[key].name}
-                </Text>
+          <View style={styles.intervalsContainer}>
+            <View style={styles.intervalRow}>
+              {[{ key: 'm2' as IntervalKey, label: 'Minor 2nd' }, { key: 'M2' as IntervalKey, label: 'Major 2nd' }].map(item => (
+                <TouchableOpacity key={item.key} style={[styles.intervalBtn, selectedInterval === item.key && styles.intervalBtnActive]} onPress={() => selectInterval(item.key)}>
+                  <Text style={[styles.intervalBtnText, selectedInterval === item.key && styles.intervalBtnTextActive]}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.intervalRow}>
+              {[{ key: 'm3' as IntervalKey, label: 'Minor 3rd' }, { key: 'M3' as IntervalKey, label: 'Major 3rd' }].map(item => (
+                <TouchableOpacity key={item.key} style={[styles.intervalBtn, selectedInterval === item.key && styles.intervalBtnActive]} onPress={() => selectInterval(item.key)}>
+                  <Text style={[styles.intervalBtnText, selectedInterval === item.key && styles.intervalBtnTextActive]}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.intervalRow}>
+              {[{ key: 'P4' as IntervalKey, label: 'Perfect 4th' }, { key: 'TT' as IntervalKey, label: 'Tritone' }, { key: 'P5' as IntervalKey, label: 'Perfect 5th' }].map(item => (
+                <TouchableOpacity key={item.key} style={[styles.intervalBtn, selectedInterval === item.key && styles.intervalBtnActive]} onPress={() => selectInterval(item.key)}>
+                  <Text style={[styles.intervalBtnText, selectedInterval === item.key && styles.intervalBtnTextActive]}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.intervalRow}>
+              {[{ key: 'm6' as IntervalKey, label: 'Minor 6th' }, { key: 'M6' as IntervalKey, label: 'Major 6th' }].map(item => (
+                <TouchableOpacity key={item.key} style={[styles.intervalBtn, selectedInterval === item.key && styles.intervalBtnActive]} onPress={() => selectInterval(item.key)}>
+                  <Text style={[styles.intervalBtnText, selectedInterval === item.key && styles.intervalBtnTextActive]}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.intervalRow}>
+              {[{ key: 'm7' as IntervalKey, label: 'Minor 7th' }, { key: 'M7' as IntervalKey, label: 'Major 7th' }].map(item => (
+                <TouchableOpacity key={item.key} style={[styles.intervalBtn, selectedInterval === item.key && styles.intervalBtnActive]} onPress={() => selectInterval(item.key)}>
+                  <Text style={[styles.intervalBtnText, selectedInterval === item.key && styles.intervalBtnTextActive]}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.intervalRow}>
+              <TouchableOpacity style={[styles.intervalBtn, selectedInterval === 'P8' && styles.intervalBtnActive]} onPress={() => selectInterval('P8')}>
+                <Text style={[styles.intervalBtnText, selectedInterval === 'P8' && styles.intervalBtnTextActive]}>Octave</Text>
               </TouchableOpacity>
-            ))}
+            </View>
           </View>
         </Section>
 
-        {currentExample ? (
-          <Card variant="highlighted" style={styles.exampleCard}>
-            <Text style={styles.exampleTitle}>{currentExample.intervalName}</Text>
-            <View style={styles.notesRow}>
-              <TouchableOpacity onPress={toggleLockBaseNote} style={[styles.noteButton, lockedBaseNote && styles.noteButtonLocked]}>
-                <FontAwesomeIcon icon={(lockedBaseNote ? faLock : faLockOpen) as any} size={12} color={lockedBaseNote ? colors.amber : colors.gray600} style={styles.lockIcon} />
-                <Text style={styles.noteText}>{currentExample.note1.name}</Text>
-              </TouchableOpacity>
-              <Text style={styles.arrow}>→</Text>
-              <TouchableOpacity onPress={() => audioEngine.playNote(currentExample.note2.midi)} style={styles.noteButton}>
-                <Text style={styles.noteText}>{currentExample.note2.name}</Text>
-              </TouchableOpacity>
-            </View>
-            {lockedBaseNote && <Text style={styles.lockedText}>Base note locked to {lockedBaseNote.name}</Text>}
-            <View style={styles.playbackControls}>
-              <Button active={playbackMode === 'melodic'} onPress={() => changePlaybackMode('melodic')} size="sm">Melodic</Button>
-              <Button active={playbackMode === 'harmonic'} onPress={() => changePlaybackMode('harmonic')} size="sm">Harmonic</Button>
-              <Button variant="secondary" onPress={refresh} size="sm">New Example</Button>
-            </View>
-          </Card>
-        ) : (
-          <Card variant="subtle" style={styles.placeholderCard}>
-            <Text style={styles.placeholderText}>Select an interval above to start learning</Text>
-          </Card>
-        )}
+        <Card variant="highlighted" style={styles.exampleCard}>
+          {currentExample ? (
+            <>
+              <Text style={styles.exampleTitle}>{currentExample.intervalName}</Text>
+              <View style={styles.notesRow}>
+                <TouchableOpacity onPress={toggleLockBaseNote} style={[styles.noteButton, lockedBaseNote && styles.noteButtonLocked]}>
+                  {lockedBaseNote && <FontAwesomeIcon icon={faLock as any} size={10} color={colors.primary} style={styles.lockIcon} />}
+                  <Text style={[styles.noteText, lockedBaseNote && styles.noteTextLocked]}>{currentExample.note1.name}</Text>
+                </TouchableOpacity>
+                <Text style={styles.arrow}>→</Text>
+                <TouchableOpacity onPress={() => audioEngine.playNote(currentExample.note2.midi)} style={styles.noteButton}>
+                  <Text style={styles.noteText}>{currentExample.note2.name}</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.playbackControls}>
+                <Button active={playbackMode === 'melodic'} onPress={() => changePlaybackMode('melodic')} size="sm">Melodic</Button>
+                <Button active={playbackMode === 'harmonic'} onPress={() => changePlaybackMode('harmonic')} size="sm">Harmonic</Button>
+                <Button variant="secondary" onPress={refresh} size="sm">New Example</Button>
+              </View>
+            </>
+          ) : (
+            <Text style={styles.placeholderText}>Select an interval to hear examples</Text>
+          )}
+        </Card>
 
         <View style={styles.settingsRow}>
           <Section title="Direction" style={styles.settingSection}>
@@ -170,23 +198,23 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
   content: { padding: spacing.lg },
-  intervalsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  intervalCard: { paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md, borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.gray700 },
-  intervalCardActive: { backgroundColor: colors.gray700, borderColor: colors.primary },
-  intervalCardText: { color: colors.gray500, fontSize: fontSize.sm },
-  intervalCardTextActive: { color: colors.gray200 },
-  exampleCard: { alignItems: 'center', marginBottom: spacing.xl },
+  intervalsContainer: { gap: spacing.sm },
+  intervalRow: { flexDirection: 'row', gap: spacing.sm },
+  intervalBtn: { flex: 1, paddingVertical: spacing.sm + 2, borderRadius: borderRadius.md, backgroundColor: colors.gray800, alignItems: 'center' },
+  intervalBtnActive: { backgroundColor: colors.primary },
+  intervalBtnText: { color: colors.gray500, fontSize: fontSize.sm },
+  intervalBtnTextActive: { color: colors.text },
+  exampleCard: { alignItems: 'center', marginBottom: spacing.lg, minHeight: 140 },
   exampleTitle: { fontSize: fontSize.xxl, color: colors.gray200, marginBottom: spacing.md },
-  notesRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
+  notesRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
   noteButton: { flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.xs, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  noteButtonLocked: { backgroundColor: colors.amberBg },
+  noteButtonLocked: { backgroundColor: colors.primaryDark + '30' },
   lockIcon: { marginRight: spacing.xs },
   noteText: { fontSize: fontSize.xl, color: colors.gray400 },
+  noteTextLocked: { color: colors.primary },
   arrow: { fontSize: fontSize.xl, color: colors.gray600, marginHorizontal: spacing.sm },
-  lockedText: { fontSize: fontSize.xs, color: colors.amber, marginBottom: spacing.md },
-  playbackControls: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
-  placeholderCard: { alignItems: 'center', marginBottom: spacing.xl },
-  placeholderText: { color: colors.gray500 },
+  playbackControls: { flexDirection: 'row', gap: spacing.sm },
+  placeholderText: { color: colors.gray600 },
   settingsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl },
   settingSection: { flex: 1, minWidth: 150, marginBottom: 0 },
   toggleGroup: { flexDirection: 'row', gap: spacing.xs },
