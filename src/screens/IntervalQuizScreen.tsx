@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   playbackControls: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm, marginBottom: spacing.md },
   answersContainer: { gap: spacing.sm, marginBottom: spacing.md },
   answerRow: { flexDirection: 'row', gap: spacing.sm },
-  answerButton: { flex: 1, paddingVertical: spacing.sm + 2, backgroundColor: colors.gray700, borderRadius: borderRadius.md, alignItems: 'center', borderWidth: 2, borderColor: 'transparent' },
+  answerButton: { flex: 1, paddingVertical: spacing.sm + 2, backgroundColor: colors.gray700, borderRadius: borderRadius.md, alignItems: 'center' },
   answerCorrect: { backgroundColor: colors.successBg },
   answerWrong: { backgroundColor: colors.errorBg },
   answerDisabled: { backgroundColor: colors.gray800 },
@@ -259,6 +259,6 @@ const styles = StyleSheet.create({
   answerTextCorrect: { color: colors.success },
   answerTextWrong: { color: colors.error },
   answerTextMuted: { color: colors.gray600 },
-  answerHighlighted: { borderColor: colors.primary },
+  answerHighlighted: { shadowColor: colors.primary, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 8, elevation: 8 },
   nextContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: spacing.md, height: 56 },
 });
