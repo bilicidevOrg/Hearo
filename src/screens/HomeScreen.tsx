@@ -51,6 +51,6 @@ const styles = StyleSheet.create({
   title: { fontSize: fontSize.xxxl, fontWeight: '300', color: colors.gray200, marginBottom: spacing.sm },
   subtitle: { fontSize: fontSize.md, color: colors.gray500, marginBottom: spacing.xxl, textAlign: 'center' },
   buttons: { gap: spacing.md, width: '100%', maxWidth: 280 },
-  poweredBy: { position: 'absolute', bottom: spacing.md, right: spacing.lg, flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  poweredBy: { position: 'absolute', bottom: spacing.lg, right: spacing.lg, flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   poweredByText: { color: colors.gray600, fontSize: fontSize.xs },
 });

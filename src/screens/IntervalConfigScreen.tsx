@@ -143,9 +143,6 @@ export function IntervalConfigScreen({ navigation }: Props) {
             <IntervalRow items={[{ key: 'm7', label: 'Minor 7th' }, { key: 'M7', label: 'Major 7th' }]} />
             <IntervalRow items={[{ key: 'P8', label: 'Octave' }]} />
           </View>
-        </Section>
-
-        <Section title="Scale">
           <View style={styles.scaleRow}>
             <TouchableOpacity style={styles.dropdown} onPress={() => setShowScaleDropdown(true)}>
               <Text style={styles.dropdownText}>{SCALES[selectedScale].name}</Text>
@@ -162,34 +159,37 @@ export function IntervalConfigScreen({ navigation }: Props) {
           </View>
         </Section>
 
-        <Section title="Direction">
-          <View style={styles.toggleGroup}>
-            <DirectionButton value="ascending" label="Ascending" />
-            <DirectionButton value="descending" label="Descending" />
-            <DirectionButton value="both" label="Both" />
-          </View>
-        </Section>
+        <View style={styles.settingsRow}>
+          <Section title="Direction" style={styles.settingSection}>
+            <View style={styles.toggleGroup}>
+              <DirectionButton value="ascending" label="Asc" />
+              <DirectionButton value="descending" label="Desc" />
+              <DirectionButton value="both" label="Both" />
+            </View>
+          </Section>
+          <Section title="Sustain" style={styles.settingSection}>
+            <View style={styles.sliderContainer}>
+              <Slider
+                style={styles.slider}
+                minimumValue={0.2}
+                maximumValue={2}
+                step={0.1}
+                value={sustainDuration}
+                onValueChange={setSustainDuration}
+                minimumTrackTintColor={colors.primary}
+                maximumTrackTintColor={colors.gray700}
+                thumbTintColor={colors.gray300}
+              />
+              <Text style={styles.sliderValue}>{sustainDuration.toFixed(1)}s</Text>
+            </View>
+          </Section>
+        </View>
 
-        <Section title="Sustain Duration">
-          <View style={styles.sliderContainer}>
-            <Slider
-              style={styles.slider}
-              minimumValue={0.2}
-              maximumValue={2}
-              step={0.1}
-              value={sustainDuration}
-              onValueChange={setSustainDuration}
-              minimumTrackTintColor={colors.primary}
-              maximumTrackTintColor={colors.gray700}
-              thumbTintColor={colors.gray300}
-            />
-            <Text style={styles.sliderValue}>{sustainDuration.toFixed(1)}s</Text>
-          </View>
-        </Section>
-
-        <Button size="lg" onPress={handleStart} disabled={!hasSelection} style={styles.startButton}>
-          Start Training
-        </Button>
+        <View style={styles.startButtonContainer}>
+          <Button size="lg" onPress={handleStart} disabled={!hasSelection}>
+            Start Training
+          </Button>
+        </View>
       </ScrollView>
 
       <Modal visible={showScaleDropdown} transparent animationType="fade" onRequestClose={() => setShowScaleDropdown(false)}>
@@ -212,8 +212,8 @@ export function IntervalConfigScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
-  content: { padding: spacing.lg },
-  scaleRow: { flexDirection: 'row', gap: spacing.sm },
+  content: { padding: spacing.lg, flexGrow: 1 },
+  scaleRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   dropdown: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md, backgroundColor: colors.gray800, borderRadius: borderRadius.md },
   dropdownText: { color: colors.gray200, fontSize: fontSize.md },
   playScaleBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md, backgroundColor: colors.gray800, borderRadius: borderRadius.md },
@@ -222,39 +222,23 @@ const styles = StyleSheet.create({
   playScaleTextDisabled: { color: colors.gray600 },
   sectionActions: { flexDirection: 'row', gap: spacing.lg },
   actionText: { color: colors.gray500, fontSize: fontSize.sm },
-  rowsContainer: {
-    gap: spacing.sm,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  toggle: {
-    flex: 1,
-    paddingVertical: spacing.sm + 2,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.gray800,
-    alignItems: 'center',
-  },
-  toggleActive: {
-    backgroundColor: colors.primary,
-  },
-  toggleText: {
-    color: colors.gray500,
-    fontSize: fontSize.sm,
-  },
-  toggleTextActive: {
-    color: colors.text,
-  },
-  toggleGroup: { flexDirection: 'row', gap: spacing.sm },
-  toggleButton: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.gray700 },
+  rowsContainer: { gap: spacing.sm },
+  row: { flexDirection: 'row', gap: spacing.sm },
+  toggle: { flex: 1, paddingVertical: spacing.sm + 2, backgroundColor: colors.gray800, borderRadius: borderRadius.md, alignItems: 'center' },
+  toggleActive: { backgroundColor: colors.primary },
+  toggleText: { color: colors.gray500, fontSize: fontSize.sm },
+  toggleTextActive: { color: colors.text },
+  settingsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  settingSection: { flex: 1, minWidth: 150, marginBottom: 0 },
+  toggleGroup: { flexDirection: 'row', gap: spacing.xs },
+  toggleButton: { paddingVertical: spacing.xs + 2, paddingHorizontal: spacing.sm, borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.gray700 },
   toggleButtonActive: { backgroundColor: colors.gray700, borderColor: colors.gray600 },
   toggleButtonText: { color: colors.gray500, fontSize: fontSize.sm },
   toggleButtonTextActive: { color: colors.gray200 },
-  sliderContainer: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  slider: { flex: 1, height: 30 },
-  sliderValue: { color: colors.gray400, fontSize: fontSize.md, width: 40 },
-  startButton: { marginTop: spacing.sm },
+  sliderContainer: { flexDirection: 'row', alignItems: 'center' },
+  slider: { flex: 1, height: 40 },
+  sliderValue: { color: colors.gray400, fontSize: fontSize.sm, width: 35 },
+  startButtonContainer: { flex: 1, justifyContent: 'center', marginTop: spacing.md },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { backgroundColor: colors.bgLighter, borderRadius: borderRadius.lg, padding: spacing.sm, minWidth: 200 },
   modalItem: { paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md },

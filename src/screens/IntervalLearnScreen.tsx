@@ -146,9 +146,6 @@ export function IntervalLearnScreen({ navigation }: Props) {
               </View>
             ))}
           </View>
-        </Section>
-
-        <Section title="Scale">
           <View style={styles.scaleRow}>
             <TouchableOpacity style={styles.dropdown} onPress={() => setShowScaleDropdown(true)}>
               <Text style={styles.dropdownText}>{SCALES[selectedScale].name}</Text>
@@ -229,7 +226,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1 },
   content: { padding: spacing.lg },
-  scaleRow: { flexDirection: 'row', gap: spacing.sm },
+  scaleRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   dropdown: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md, backgroundColor: colors.gray800, borderRadius: borderRadius.md },
   dropdownText: { color: colors.gray200, fontSize: fontSize.md },
   playScaleBtn: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm + 2, paddingHorizontal: spacing.md, backgroundColor: colors.gray800, borderRadius: borderRadius.md },
@@ -238,9 +235,9 @@ const styles = StyleSheet.create({
   playScaleTextDisabled: { color: colors.gray600 },
   intervalsContainer: { gap: spacing.sm },
   intervalRow: { flexDirection: 'row', gap: spacing.sm },
-  intervalBtn: { flex: 1, paddingVertical: spacing.sm + 2, borderRadius: borderRadius.md, backgroundColor: colors.gray800, alignItems: 'center' },
+  intervalBtn: { flex: 1, paddingVertical: spacing.sm + 2, backgroundColor: colors.gray800, borderRadius: borderRadius.md, alignItems: 'center' },
   intervalBtnActive: { backgroundColor: colors.primary },
-  intervalBtnHighlight: { backgroundColor: colors.gray700, borderWidth: 1, borderColor: colors.gray600 },
+  intervalBtnHighlight: { backgroundColor: colors.gray700 },
   intervalBtnText: { color: colors.gray500, fontSize: fontSize.sm },
   intervalBtnTextActive: { color: colors.text },
   intervalBtnTextHighlight: { color: colors.gray300 },
@@ -255,7 +252,7 @@ const styles = StyleSheet.create({
   arrow: { fontSize: fontSize.xl, color: colors.gray600, marginHorizontal: spacing.sm },
   playbackControls: { flexDirection: 'row', gap: spacing.sm },
   placeholderText: { color: colors.gray600 },
-  settingsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xl },
+  settingsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   settingSection: { flex: 1, minWidth: 150, marginBottom: 0 },
   toggleGroup: { flexDirection: 'row', gap: spacing.xs },
   toggleButton: { paddingVertical: spacing.xs + 2, paddingHorizontal: spacing.sm, borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.gray700 },
