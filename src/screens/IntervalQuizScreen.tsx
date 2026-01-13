@@ -143,7 +143,7 @@ export function IntervalQuizScreen({ route, navigation }: Props) {
                 <Text style={styles.noteName}>{isAnswered ? question.note2.name : '?'}</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.intervalResult, !isAnswered && styles.hidden]}>{question.intervalName}</Text>
+            <Text style={styles.intervalResult}>{isAnswered ? question.intervalName : ' '}</Text>
           </View>
         )}
 
@@ -201,7 +201,6 @@ const styles = StyleSheet.create({
   noteNameLocked: { color: colors.primary },
   arrow: { fontSize: fontSize.xxl, color: colors.gray600, marginHorizontal: spacing.md },
   intervalResult: { fontSize: fontSize.lg, color: colors.primary, height: 24 },
-  hidden: { color: 'transparent' },
   bottomSection: {},
   playbackControls: { flexDirection: 'row', justifyContent: 'center', gap: spacing.sm, marginBottom: spacing.md },
   answersContainer: { gap: spacing.sm, marginBottom: spacing.md },
