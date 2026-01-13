@@ -45,23 +45,25 @@ export function IntervalConfigScreen({ navigation }: Props) {
     }
   };
 
-  const IntervalButton = ({ keyName }: { keyName: IntervalKey }) => {
-    const interval = INTERVALS[keyName];
+  const Toggle = ({ keyName, label }: { keyName: IntervalKey; label: string }) => {
     const isActive = intervals[keyName];
     return (
       <TouchableOpacity
         onPress={() => toggleInterval(keyName)}
-        style={[styles.intervalButton, isActive && styles.intervalButtonActive]}
+        style={[styles.toggle, isActive && styles.toggleActive]}
       >
-        <Text style={[styles.intervalAbbrev, isActive && styles.intervalTextActive]}>
-          {interval.abbrev}
-        </Text>
-        <Text style={[styles.intervalName, isActive && styles.intervalNameActive]}>
-          {interval.name.replace('Perfect ', 'P').replace('Major ', 'Maj ').replace('Minor ', 'Min ')}
-        </Text>
+        <Text style={[styles.toggleText, isActive && styles.toggleTextActive]}>{label}</Text>
       </TouchableOpacity>
     );
   };
+
+  const IntervalRow = ({ items }: { items: { key: IntervalKey; label: string }[] }) => (
+    <View style={styles.row}>
+      {items.map(item => (
+        <Toggle key={item.key} keyName={item.key} label={item.label} />
+      ))}
+    </View>
+  );
 
   const DirectionButton = ({ value, label }: { value: typeof direction; label: string }) => (
     <TouchableOpacity
@@ -87,25 +89,13 @@ export function IntervalConfigScreen({ navigation }: Props) {
             </View>
           }
         >
-          <View style={styles.intervalsGrid}>
-            <View style={styles.intervalRow}>
-              <IntervalButton keyName="m2" />
-              <IntervalButton keyName="M2" />
-              <IntervalButton keyName="m3" />
-              <IntervalButton keyName="M3" />
-            </View>
-            <View style={styles.intervalRow}>
-              <IntervalButton keyName="P4" />
-              <IntervalButton keyName="TT" />
-              <IntervalButton keyName="P5" />
-              <IntervalButton keyName="m6" />
-            </View>
-            <View style={styles.intervalRow}>
-              <IntervalButton keyName="M6" />
-              <IntervalButton keyName="m7" />
-              <IntervalButton keyName="M7" />
-              <IntervalButton keyName="P8" />
-            </View>
+          <View style={styles.rowsContainer}>
+            <IntervalRow items={[{ key: 'm2', label: 'Minor 2nd' }, { key: 'M2', label: 'Major 2nd' }]} />
+            <IntervalRow items={[{ key: 'm3', label: 'Minor 3rd' }, { key: 'M3', label: 'Major 3rd' }]} />
+            <IntervalRow items={[{ key: 'P4', label: 'Perfect 4th' }, { key: 'TT', label: 'Tritone' }, { key: 'P5', label: 'Perfect 5th' }]} />
+            <IntervalRow items={[{ key: 'm6', label: 'Minor 6th' }, { key: 'M6', label: 'Major 6th' }]} />
+            <IntervalRow items={[{ key: 'm7', label: 'Minor 7th' }, { key: 'M7', label: 'Major 7th' }]} />
+            <IntervalRow items={[{ key: 'P8', label: 'Octave' }]} />
           </View>
         </Section>
 
@@ -148,21 +138,30 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg },
   sectionActions: { flexDirection: 'row', gap: spacing.lg },
   actionText: { color: colors.gray500, fontSize: fontSize.sm },
-  intervalsGrid: { gap: spacing.sm },
-  intervalRow: { flexDirection: 'row', gap: spacing.sm },
-  intervalButton: {
+  rowsContainer: {
+    gap: spacing.sm,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  toggle: {
     flex: 1,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm + 2,
     borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.gray700,
+    backgroundColor: colors.gray800,
     alignItems: 'center',
   },
-  intervalButtonActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  intervalAbbrev: { color: colors.gray400, fontSize: fontSize.lg, fontWeight: '600' },
-  intervalName: { color: colors.gray600, fontSize: fontSize.xs, marginTop: 2 },
-  intervalTextActive: { color: colors.text },
-  intervalNameActive: { color: colors.gray300 },
+  toggleActive: {
+    backgroundColor: colors.primary,
+  },
+  toggleText: {
+    color: colors.gray500,
+    fontSize: fontSize.sm,
+  },
+  toggleTextActive: {
+    color: colors.text,
+  },
   toggleGroup: { flexDirection: 'row', gap: spacing.sm },
   toggleButton: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: borderRadius.md, borderWidth: 1, borderColor: colors.gray700 },
   toggleButtonActive: { backgroundColor: colors.gray700, borderColor: colors.gray600 },
