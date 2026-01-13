@@ -1,0 +1,43 @@
+/**
+ * Sound file mappings for React Native
+ */
+
+// Piano samples (C3-B5 = 36 notes)
+export const PIANO_SOUNDS = {
+  'C3': require('../../../assets/sounds/piano/C3.mp3'),
+  'Cs3': require('../../../assets/sounds/piano/Cs3.mp3'),
+  'D3': require('../../../assets/sounds/piano/D3.mp3'),
+  'Ds3': require('../../../assets/sounds/piano/Ds3.mp3'),
+  'E3': require('../../../assets/sounds/piano/E3.mp3'),
+  'F3': require('../../../assets/sounds/piano/F3.mp3'),
+  'Fs3': require('../../../assets/sounds/piano/Fs3.mp3'),
+  'G3': require('../../../assets/sounds/piano/G3.mp3'),
+  'Gs3': require('../../../assets/sounds/piano/Gs3.mp3'),
+  'A3': require('../../../assets/sounds/piano/A3.mp3'),
+  'As3': require('../../../assets/sounds/piano/As3.mp3'),
+  'B3': require('../../../assets/sounds/piano/B3.mp3'),
+  'C4': require('../../../assets/sounds/piano/C4.mp3'),
+  'Cs4': require('../../../assets/sounds/piano/Cs4.mp3'),
+  'D4': require('../../../assets/sounds/piano/D4.mp3'),
+  'Ds4': require('../../../assets/sounds/piano/Ds4.mp3'),
+  'E4': require('../../../assets/sounds/piano/E4.mp3'),
+  'F4': require('../../../assets/sounds/piano/F4.mp3'),
+  'Fs4': require('../../../assets/sounds/piano/Fs4.mp3'),
+  'G4': require('../../../assets/sounds/piano/G4.mp3'),
+  'Gs4': require('../../../assets/sounds/piano/Gs4.mp3'),
+  'A4': require('../../../assets/sounds/piano/A4.mp3'),
+  'As4': require('../../../assets/sounds/piano/As4.mp3'),
+  'B4': require('../../../assets/sounds/piano/B4.mp3'),
+  'C5': require('../../../assets/sounds/piano/C5.mp3'),
+  'Cs5': require('../../../assets/sounds/piano/Cs5.mp3'),
+  'D5': require('../../../assets/sounds/piano/D5.mp3'),
+  'Ds5': require('../../../assets/sounds/piano/Ds5.mp3'),
+  'E5': require('../../../assets/sounds/piano/E5.mp3'),
+  'F5': require('../../../assets/sounds/piano/F5.mp3'),
+  'Fs5': require('../../../assets/sounds/piano/Fs5.mp3'),
+  'G5': require('../../../assets/sounds/piano/G5.mp3'),
+  'Gs5': require('../../../assets/sounds/piano/Gs5.mp3'),
+  'A5': require('../../../assets/sounds/piano/A5.mp3'),
+  'As5': require('../../../assets/sounds/piano/As5.mp3'),
+  'B5': require('../../../assets/sounds/piano/B5.mp3'),
+};
